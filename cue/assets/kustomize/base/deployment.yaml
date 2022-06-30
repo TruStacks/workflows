@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-workflow-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react-workflow-demo
+  template:
+    metadata:
+      labels:
+        app: react-workflow-demo
+    spec:
+      containers:
+      - name: webserver
+        image: 936865222257621573876055.azurecr.io/react-workflow-demo
+        imagePullPolicy: always
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        resources:
+          cpu:
+            requests: 100m
+            limit: 300m
+          memory:
+            requests: 128Mi
+            limit: 512Mi
+      imagePullSecrets:
+      - name: registry-secret

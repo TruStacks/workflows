@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# copy dependencies to the source directory
+cp -R /opt/trustacks ./.trustacks
+
+# initialize and update dagger.
+cd .trustacks
+dagger project init
+dagger project update
+
+# fetch the trustacks cue library.
+git clone https://github.com/TruStacks/cue.git ./cue.mod/pkg/trustacks.io
+
+dagger do "$1" --log-format=plain

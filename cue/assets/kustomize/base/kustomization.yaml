@@ -1,0 +1,5 @@
+resources:
+- deployment.yaml
+- service.yaml
+- namespace.yaml
+- registry-secret.yaml # auto-generated

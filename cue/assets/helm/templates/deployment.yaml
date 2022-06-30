@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      containers:
+      - name: {{ .Values.name }}
+        image: {{ .Values.image }}
+        ports:
+        - containerPort: {{ .Values.port }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: {{ .Values.port }}
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: {{ .Values.port }}
+        resources:
+          cpu:
+            requests: 100m
+            limit: 300m
+          memory:
+            requests: 128Mi
+            limit: 512Mi
+      imagePullSecrets:
+      - name: image-pull-secret

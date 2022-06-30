@@ -1,0 +1,13 @@
+{
+	"build": {
+		"args": { 
+			"VARIANT": "8.5"
+		}
+	},
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "devcontainer",
+	"runServices": ["buildkitd"],
+	"workspaceFolder": "/workspace",
+	"shutdownAction": "none",
+	"remoteUser": "trustacks"
+}
