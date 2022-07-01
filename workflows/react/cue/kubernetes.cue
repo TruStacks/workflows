@@ -2,7 +2,6 @@ package main
 
 import (
     "dagger.io/dagger"
-    "dagger.io/dagger/core"
 
     "trustacks.io/kubectl"
     "trustacks.io/react"
@@ -11,17 +10,23 @@ import (
 
 kubernetes: {
     #Build: {
-        // React source code.
+        // Build assets.
+        assets: dagger.#FS
+
+        // Project source.
         source: dagger.#FS
 
-        // Secret and config mounts.
-        mounts: dagger.#FS
-        
-        // Container registry credentials.
-        registryCredentials: _
+        // age encryption key.
+        ageKey: string
         
         // Container registry name.
         registry: string
+        
+        // Container registry username.
+        registryUsername: string
+
+        // Container registry password.
+        registryPassword: dagger.#Secret
         
         // Container image name and tag.
         ref: string
@@ -29,35 +34,29 @@ kubernetes: {
         // Kustomize assets.
         output: kustomize.output
 
-        // Age key for sops.
-        _ageKey: core.#NewSecret & {
-            input: mounts
-            path:  "/secrets/age-key"
-        }
-
         // Create the kubernetes docker registry secret.
-        registrySecret: kubectl.#DockerRegistry & {
+        _registrySecret: kubectl.#DockerRegistry & {
             name:     "registry-secret"
             dryRun:   "client"
             server:   registry
-            username: registryCredentials.username.contents
-            password: registryCredentials.password.output
+            username: registryUsername
+            password: registryPassword
         }
 
         // Encrypt the registry secret.
-        sopsRegistrySecret: sops.#Encrypt & {
-            source: registrySecret.output
+        _sopsRegistrySecret: sops.#Encrypt & {
+            source: _registrySecret.output
             path:   "secret.yaml"
             regex:  "^(data|stringData)$"
-            ageKey: _ageKey.output
+            key:    ageKey
         }
 
         // Configure the kustomize assets.
         kustomize: react.#Kustomize & {
             "source":       source
-            depsDir:        ".trustacks/assets"
+            "assets":       assets
             imageRef:       ref
-            registrySecret: sopsRegistrySecret.output
+            registrySecret: _sopsRegistrySecret.output
         }
     }
 }

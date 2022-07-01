@@ -18,6 +18,6 @@ RUN curl -Lo /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86
 # create default mount directories
 RUN mkdir -p /mnt/vars && mkdir -p /mnt/secrets
 
-COPY cue /opt/trustacks
+COPY workflows /opt/workflows
 COPY docker-entrypoint /usr/local/bin/docker-entrypoint
 ENTRYPOINT ["docker-entrypoint"]s
