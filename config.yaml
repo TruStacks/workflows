@@ -1,5 +1,5 @@
-workflows: ./workflows
-dependencies:
-- catalog: http://trustacks-catalog.eastus2.azurecontainer.io
-  components:
-  - flux2
+react:
+  dependencies:
+  - catalog: http://trustacks-catalog.eastus2.azurecontainer.io
+    components:
+    - argocd

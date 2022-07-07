@@ -20,4 +20,4 @@ RUN mkdir -p /mnt/vars && mkdir -p /mnt/secrets
 
 COPY workflows /opt/workflows
 COPY docker-entrypoint /usr/local/bin/docker-entrypoint
-ENTRYPOINT ["docker-entrypoint"]s
+ENTRYPOINT ["docker-entrypoint"]

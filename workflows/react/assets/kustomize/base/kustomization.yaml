@@ -1,0 +1,3 @@
+generators:
+- ./secret-generator.yaml
+resources:

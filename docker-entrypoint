@@ -1,9 +1,10 @@
 #!/bin/sh
 
+cp -R . /tmp/source
 cd /opt/workflows/$WORKFLOW/cue
 
 # copy dependencies to the source directory
-cp -R ./assets /assets
+cp -R ../assets /assets
 
 # initialize and update dagger.
 dagger project init

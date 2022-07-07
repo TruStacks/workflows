@@ -6,11 +6,13 @@ import (
     "dagger.io/dagger"
     "dagger.io/dagger/core"
 
+    "trustacks.io/argocd"
     "trustacks.io/commitizen"
     "trustacks.io/eslint"
-    "trustacks.io/flux2"
+    "trustacks.io/kubectl"
     "trustacks.io/react"
     "trustacks.io/shiftleft"
+    "trustacks.io/sops"
     "trustacks.io/trivy"
 )
 
@@ -37,8 +39,8 @@ import (
     // Variables
     _var: {
         remote:           strings.TrimSpace(_remote.contents)
-        registry:         strings.TrimSpace(_registry.contents)
         project:          strings.TrimSpace(_project.contents)
+        registry:         strings.TrimSpace(_registry.contents)
         registryUsername: strings.TrimSpace(_registryUsername.contents)
         ageKey:           strings.TrimSpace(_ageKey.contents)
 
@@ -46,13 +48,13 @@ import (
             input: vars
             path:  "remote"
         }
-        _registry: core.#ReadFile & {
-            input: vars
-            path:  "registry"
-        }
         _project: core.#ReadFile & {
             input: vars
             path:  "project"
+        }
+        _registry: core.#ReadFile & {
+            input: vars
+            path:  "registry"
         }
         _registryUsername: core.#ReadFile & {
             input: vars
@@ -62,48 +64,61 @@ import (
             input: vars
             path:  "age-key"
         }
+        if deployType == "kubernetes" {
+            argocdServer: strings.TrimSpace(_argocdServer.contents)
+
+            _argocdServer: core.#ReadFile & {
+                input: vars
+                path:  "argocd-server"   
+            }
+        }
     }
 
     // Secrets
     _secret: {
-        registryPassword: core.#NewSecret & {
+        registryPassword: _registryPassword.output
+        privateKey:       _privateKey.output
+
+        _registryPassword: core.#NewSecret & {
             input: secrets
             path:  "registry-password"
         }
-        privateKey: core.#NewSecret & {
+        _privateKey: core.#NewSecret & {
             input: secrets
             path:  "source-private-key"
         }
-        kubeconfig: core.#NewSecret & {
-            input: secrets
-            path:  "kubeconfig"
+        if deployType == "kubernetes" {
+            argocdPassword: _argocdPassword.output
+
+            _argocdPassword: core.#NewSecret & {
+                input: secrets
+                path:  "argocd-password"   
+            }
         }
     }
 
-    // Configured source.
-    _source: configure.output
-
-    // Run the prerequisites.
+    // Configure source.
     configure: react.#Configure & {
         "source": source
     }
+    _source: configure.output
 
     // Fetch the next semantic version.
     version: commitizen.#Version & {
         source: _source
     }
     
-    // Run static analysis.
+    // Static analysis.
     lint: eslint.#Run & {
         source: _source
     }
 
-    // Run unit tests.
+    // Unit tests.
     test: react.#Test & {
         source: _source
     }
 
-    // Run static application security testing.
+    // Static application security testing.
     sast: shiftleft.#Scan & {
         source: _source
     }
@@ -120,23 +135,30 @@ import (
         "build":  build.output
     }
 
-    // Scan for container vulnerabilities.
+    // Scan container.
     vulnerability: trivy.#Scan & {
         image: containerize.output
     }
 
     // Push the container imag.
     publish: react.#Publish & {
+        input:    _source
         image:    containerize.image
         ref:      _imageRef
         username: _var.registryUsername
-        password: _secret.registryPassword.output
+        password: _secret.registryPassword
+        requires: [
+            lint.code,
+            test.code,
+            sast.code,
+            vulnerability.code,
+        ]
     }
 
     //  the source version.
     bump: commitizen.#Bump & {
         if deployType == "kubernetes" {
-            source: target.k8s.output
+            source: k8s.kustomize.output
         }
         amend:  [".trustacks"]
     }
@@ -149,24 +171,50 @@ import (
         "version": version.output
     }
 
-    target: {
-        // Build the kubernetes deployment.
+    k8s: {
         if deployType == "kubernetes" {
-            k8s: kubernetes.#Build & {
-                "assets":         assets
-                source:           _source
-                ageKey:           _var.ageKey
-                registry:         _var.registry
-                registryUsername: _var.registryUsername
-                registryPassword: _secret.registryPassword.output
-                ref:              _imageRef
+            // Create the kubernetes registry secret.
+            _registrySecret: kubectl.#DockerRegistry & {
+                name:      "registry-secret"
+                namespace:  _var.project
+                dryRun:    "client"
+                server:    _var.registry
+                username:  _var.registryUsername
+                password:  _secret.registryPassword
             }
-            flux: flux2.#Create & {
-                project:    _var.project
-                url:        commit.output
-                tag:        "0.8.0"
-                privateKey: _secret.privateKey.output
-                kubeconfig: _secret.kubeconfig.output
+
+            // Encrypt the registry secret.
+            _sopsRegistrySecret: sops.#Encrypt & {
+                source: _registrySecret.output
+                path:   "secret.yaml"
+                regex:  "^(data|stringData)$"
+                key:    _var.ageKey
+            }
+
+            // Configure the kustomize assets.
+            kustomize: react.#Kustomize & {
+                input:          publish.output
+                "assets":       assets
+                imageRef:       _imageRef
+                registrySecret: _sopsRegistrySecret.output
+                
+                values: {
+                    name:  _var.project
+                    image: _imageRef
+                }
+            }
+
+            // Create the argocd application.
+            argo: argocd.#Create & {
+                project:  _var.project
+                server:     _var.argocdServer
+                username:   "admin"
+                password:   _secret.argocdPassword
+                repo:       commit.output
+                revision:   version.output
+                privateKey: _secret.privateKey
+                overlay:    "staging"
+                insecure:   "true"
             }
         }
     }
