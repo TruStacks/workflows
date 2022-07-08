@@ -112,7 +112,7 @@ import (
             // Create the kubernetes registry secret.
             _registrySecret: kubectl.#DockerRegistry & {
                 name:      "registry-secret"
-                namespace:  vars."project"
+                namespace: vars."project"
                 dryRun:    "client"
                 server:    vars."registry-host"
                 username:  vars."registry-username"
