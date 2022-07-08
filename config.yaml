@@ -1,3 +1,4 @@
+workflows:
 - name: react
   dependencies:
   - catalog: http://trustacks-catalog.eastus2.azurecontainer.io
