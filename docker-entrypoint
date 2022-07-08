@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cp -R . /tmp/source
+cp -R . /src
 cd /opt/workflows/$WORKFLOW/cue
 
 # copy dependencies to the source directory
