@@ -124,7 +124,7 @@ import (
                 source: _registrySecret.output
                 path:   "secret.yaml"
                 regex:  "^(data|stringData)$"
-                key:    vars."age-key"
+                key:    vars."age-public-key"
             }
 
             // Configure the kustomize assets.

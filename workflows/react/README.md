@@ -40,14 +40,14 @@ This workflow requires the following inputs to be mounted to the workflow contai
 ## Variables 
 **mount path**: /mnt/vars
 
-| Name | Description | Required | Deployment Target |
-| - | - | - | - |
-| project | Project name | yes | all |
-| git-remote | Remote git repository ssh url *(ex: ssh://git@gitlab.com/trustacks/console/frontend.git)* | yes | all |
-| registry-host | Container registry host *(ex: quay.io)* | yes | all |
-| registry-username | Container registry username | yes | all |
-| age-key | [Age](https://github.com/FiloSottile/age) public key for [sops](https://github.com/mozilla/sops) secrets encryption | no | k8s |
-| argocd-server | Argo CD server host and *optional* port *(\<host\>:\<port> \)* | no | k8s
+| Name | Description | Required | Deployment Target | Provider |
+| - | - | - | - | - |
+| project | Project name | yes | all | user |
+| git-remote | Remote git repository ssh url *(ex: ssh://git@gitlab.com/trustacks/console/frontend.git)* | yes | all | user |
+| registry-host | Container registry host *(ex: quay.io)* | yes | all | user |
+| registry-username | Container registry username | yes | all | user |
+| age-key | [Age](https://github.com/FiloSottile/age) public key for [sops](https://github.com/mozilla/sops) secrets encryption | no | k8s | system |
+| argocd-server | Argo CD server host and *optional* port *(\<host\>:\<port> \)* | no | k8s | user
 
 ## Secrets 
 **mount path**: /mnt/secrets

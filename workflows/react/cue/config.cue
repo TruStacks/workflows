@@ -22,7 +22,7 @@ package main
             },
             {
                 // Age public key for sops encryption.
-                name: "age-key"
+                name: "age-public-key"
             },
             {
                 // Argo CD server (<host>:<port>)
