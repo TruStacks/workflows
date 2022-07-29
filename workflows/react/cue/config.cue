@@ -10,37 +10,37 @@ package main
             },
             {
                 // Remote repository url (must begin with: 'ssh://').
-                name: "git-remote"
+                name: "gitRemote"
             },
             {
                 // Container registry host.
-                name: "registry-host"
+                name: "registryHost"
             },
             {
                 // Container registry auth username.
-                name: "registry-username"
+                name: "registryUsername"
             },
             {
                 // Age public key for sops encryption.
-                name: "age-public-key"
+                name: "agePublicKey"
             },
             {
                 // Argo CD server (<host>:<port>)
-                name: "argocd-server"
+                name: "argocdServer"
             }
         ]
         secrets: [
             {
                 // Remote repository ssh private key.
-                name: "git-private-key"
+                name: "gitPrivateKey"
             },
             {
                 // Container registry auth password.
-                name: "registry-password"
+                name: "registryPassword"
             },
             {
                 // Argo CD auth password.
-                name: "argocd-password"
+                name: "argocdPassword"
             },
         ]
     }

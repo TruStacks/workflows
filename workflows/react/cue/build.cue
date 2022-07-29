@@ -31,7 +31,7 @@ import (
     deployTarget: string | *"kubernetes"
     
     // Container image name and tag.
-    _imageRef: "\(vars."registry-host")/\(vars."project"):\(version.output)"
+    _imageRef: "\(vars."registryHost")/\(vars."project"):\(version.output)"
 
     // Configure source.
     configure: react.#Configure & {
@@ -81,8 +81,8 @@ import (
         input:    _source
         image:    containerize.image
         ref:      _imageRef
-        username: vars."registry-username"
-        password: secrets."registry-password"
+        username: vars."registryUsername"
+        password: secrets."registryPassword"
         requires: [
             lint.code,
             test.code,
@@ -102,8 +102,8 @@ import (
     // Tag the source code.
     commit: react.#Commit & {
         source:     bump.output
-        remote:     vars."git-remote"
-        privateKey: secrets."git-private-key"
+        remote:     vars."gitRemote"
+        privateKey: secrets."gitPrivateKey"
         "version":  version.output
     }
 
@@ -114,9 +114,9 @@ import (
                 name:      "registry-secret"
                 namespace: vars."project"
                 dryRun:    "client"
-                server:    vars."registry-host"
-                username:  vars."registry-username"
-                password:  secrets."registry-password"
+                server:    vars."registryHost"
+                username:  vars."registryUsername"
+                password:  secrets."registryPassword"
             }
 
             // Encrypt the registry secret.
@@ -124,7 +124,7 @@ import (
                 source: _registrySecret.output
                 path:   "secret.yaml"
                 regex:  "^(data|stringData)$"
-                key:    vars."age-public-key"
+                key:    vars."agePublicKey"
             }
 
             // Configure the kustomize assets.
@@ -142,12 +142,12 @@ import (
             // Create the argocd application.
             deploy: argocd.#Create & {
                 project:    vars."project"
-                server:     vars."argocd-server"
-                username:   "admin"
-                password:   secrets."argocd-password"
+                server:     vars."argocdServer"
+                username:   "trustacks"
+                password:   secrets."argocdPassword"
                 repo:       commit.output
                 revision:   version.output
-                privateKey: secrets."git-private-key"
+                privateKey: secrets."gitPrivateKey"
                 overlay:    "staging"
                 insecure:   "true"
             }
