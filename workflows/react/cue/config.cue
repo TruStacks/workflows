@@ -26,7 +26,7 @@ package main
             },
             {
                 // Argo CD server (<host>:<port>)
-                name: "argocdServer"
+                name: "argo-cd.server"
             }
         ]
         secrets: [
@@ -40,7 +40,7 @@ package main
             },
             {
                 // Argo CD auth password.
-                name: "argocdPassword"
+                name: "argo-cd.password"
             },
         ]
     }

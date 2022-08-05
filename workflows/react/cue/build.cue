@@ -142,9 +142,9 @@ import (
             // Create the argocd application.
             deploy: argocd.#Create & {
                 project:    vars."project"
-                server:     vars."argocdServer"
+                server:     vars."argo-cd.server"
                 username:   "trustacks"
-                password:   secrets."argocdPassword"
+                password:   secrets."argo-cd.password"
                 repo:       commit.output
                 revision:   version.output
                 privateKey: secrets."gitPrivateKey"
