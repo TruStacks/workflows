@@ -26,7 +26,7 @@ The workflow for [Create React App](https://create-react-app.dev/) (CRA) applica
 
 The kubernetes deployment target deploys the react application into a kubernetes cluster as a static application in an nginx container image.
 
-The container registry credentials provided via the `registry-username` and `registry-password` are encrypted and committed with the kustomize deployment assets to the provided git remote repository.
+The container registry credentials provided via the `registryUsername` and `registryPassword` are encrypted and committed with the kustomize deployment assets to the provided git remote repository.
 
 # Environment
 
