@@ -26,7 +26,7 @@ The workflow for [Create React App](https://create-react-app.dev/) (CRA) applica
 
 The kubernetes deployment target deploys the react application into a kubernetes cluster as a static application in an nginx container image.
 
-The container registry credentials provided via the `registry-username` and `registry-password` are encrypted and committed with the kustomize deployment assets to the provided git remote repository.
+The container registry credentials provided via the `registryUsername` and `registryPassword` are encrypted and committed with the kustomize deployment assets to the provided git remote repository.
 
 # Environment
 
@@ -43,17 +43,17 @@ This workflow requires the following inputs to be mounted to the workflow contai
 | Name | Description | Required | Deployment Target | Provider |
 | - | - | - | - | - |
 | project | Project name | yes | all | user |
-| git-remote | Remote git repository ssh url *(ex: ssh://git@gitlab.com/trustacks/console/frontend.git)* | yes | all | user |
-| registry-host | Container registry host *(ex: quay.io)* | yes | all | user |
-| registry-username | Container registry username | yes | all | user |
-| age-key | [Age](https://github.com/FiloSottile/age) public key for [sops](https://github.com/mozilla/sops) secrets encryption | no | k8s | system |
-| argocd-server | Argo CD server host and *optional* port *(\<host\>:\<port> \)* | no | k8s | user
+| gitRemote | Remote git repository ssh url *(ex: ssh://git@gitlab.com/trustacks/console/frontend.git)* | yes | all | user |
+| registryHost | Container registry host *(ex: quay.io)* | yes | all | user |
+| registryUsername | Container registry username | yes | all | user |
+| agePublicKey | [Age](https://github.com/FiloSottile/age) public key for [sops](https://github.com/mozilla/sops) secrets encryption | no | k8s | system |
+| argo-cd.server | Argo CD server host and *optional* port *(\<host\>:\<port> \)* | no | k8s | system |
 
 ## Secrets 
 **mount path**: /mnt/secrets
 
-| Name | Description | Required | Deployment Target |
-| - | - | - | - |
-| git-private-key | Git remote ssh private key | yes | all |
-| registry-password | Container registry password | yes | all |
-| argocd-password | Argo CD auth password | no | k8s |
+| Name | Description | Required | Deployment Target | Provider |
+| - | - | - | - | - |
+| gitPrivateKey | Git remote ssh private key | yes | all | user |
+| registryPassword | Container registry password | yes | all | user |
+| argo-cd.password | Argo CD auth password | no | k8s | system |
