@@ -1,16 +1,60 @@
-#!/bin/sh
+#!/bin/bash
 
-cp -R . /src
-cd /opt/workflows/$WORKFLOW/cue
+# configure filesystem and dagger assets.
+function configure() {
+    cp -R . /src
+    cd /opt/workflows/$WORKFLOW/cue
 
-# copy dependencies to the source directory
-cp -R ../assets /assets
+    # copy dependencies to the source directory
+    cp -R ../assets /assets
 
-# initialize and update dagger.
-dagger project init
-dagger project update
+    # initialize and update dagger.
+    dagger project init
+    dagger project update
 
-# fetch the trustacks cue library.
-git clone https://github.com/TruStacks/cue.git ./cue.mod/pkg/trustacks.io
+    # fetch the trustacks cue library.
+    git clone https://github.com/TruStacks/cue.git ./cue.mod/pkg/trustacks.io
+}
 
-dagger do "$1" --log-format=plain
+# check the conventional commit type.
+function check_cc_tag() {
+    echo $(git log -n 1 --pretty=%B) | grep -E "^(feat|fix)" > /dev/null
+    if [ "$?" == "1" ]; then
+        echo -e "\033[0;93m[skip]\033[m the commit is not a feature or fix"
+        exit 0
+    fi
+}
+
+# checks for annotations added to the commit message.
+function check_annotations() {
+    skip="ts-skip-ci"
+
+    echo $(git log -n 1 --pretty=%B) | grep "\[$skip\]" > /dev/null
+    if [ "$?" == "0" ]; then
+        echo -e "\033[0;93m[skip]\033[m the skip annotation was found in the commit message"
+        exit 0
+    fi
+}
+
+# run the ci actions
+function run_actions() {
+    actions=("setup build test package publish stage")
+
+    for action in $actions; do
+        echo ""
+        echo -e "  \033[0;93maction \033[0m: \033[0;96m$action\033[0m"
+        echo -e "  \033[10m`date --rfc-3339=seconds`\033[0m"
+        echo ""
+
+        dagger do $action --log-format=plain
+    done
+}
+
+function main() {
+    check_annotations
+    check_cc_tag
+    configure
+    run_actions
+}
+
+main
